@@ -13,7 +13,7 @@ fi
 
 mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/ ~/.config/gtk-3.0/
 
-# Ensure Compositing is ON for Cairo-Dock 3D Hover & Transparency
+# Ensure Compositing is ON for Plank Dock Hover & Transparency
 xfconf-query -c xfwm4 -p /general/use_compositing -s true --create -t bool 2>/dev/null || true
 
 # Global System Font, Title, and Desktop Icon Scaling (120 DPI = 125% Large Text)
@@ -37,9 +37,8 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     # 3. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/macos-wallpaper.jpg"
 
-    # 4. Kill Windows Taskbar & Stale Docks cleanly
+    # 4. Kill Windows Taskbar Panel & Stale Docks cleanly
     pkill -9 -f xfce4-panel 2>/dev/null || true
-    pkill -9 -f cairo-dock 2>/dev/null || true
     pkill -9 -f plank 2>/dev/null || true
 
     # Save current theme state
@@ -49,7 +48,6 @@ else
     echo "[Theme Switcher] Applying Windows 11 Light Mode Theme on $TARGET_DISP..."
     
     # 1. Kill Docks cleanly
-    pkill -9 -f cairo-dock 2>/dev/null || true
     pkill -9 -f plank 2>/dev/null || true
 
     # 2. GTK & Icon Theme
@@ -102,9 +100,9 @@ xfwm4 --replace >/dev/null 2>&1 &
 # Wait for Window Manager frame redraw to complete
 sleep 1.5
 
-# If macOS Mode, launch Cairo-Dock FRESH so mouse hover input grabs cleanly!
+# If macOS Mode, launch Plank Dock FRESH
 if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
-    cairo-dock -c >/dev/null 2>&1 &
+    plank >/dev/null 2>&1 &
 fi
 
 echo "Theme [$THEME_CHOICE] applied successfully on $TARGET_DISP!"
