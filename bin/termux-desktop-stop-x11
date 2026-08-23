@@ -1,0 +1,12 @@
+#!/data/data/com.termux/files/usr/bin/bash
+echo "[Termux Desktop] Stopping all desktop sessions, X11, VNC, and RDP servers..."
+
+pkill -9 -f "termux-x11|xfce4-session|startxfce4|xfwm4|xfdesktop|xfce4-panel|xrdp|xrdp-sesman|Xvnc|x11vnc|websockify|pulseaudio" 2>/dev/null || true
+
+rm -rf /data/data/com.termux/files/usr/tmp/.X11-unix
+rm -f /data/data/com.termux/files/usr/tmp/.X*-lock
+rm -f /data/data/com.termux/files/usr/tmp/dbus-*
+rm -f /data/data/com.termux/files/usr/var/run/xrdp*.pid
+rm -rf /data/data/com.termux/files/usr/tmp/.xrdp
+
+echo "[Termux Desktop] All sessions stopped successfully."

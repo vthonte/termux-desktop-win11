@@ -1,0 +1,25 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export PATH=/data/data/com.termux/files/usr/bin:$PATH
+export DISPLAY=:1
+export TMPDIR=/data/data/com.termux/files/usr/tmp
+export XDG_RUNTIME_DIR=/data/data/com.termux/files/usr/tmp
+
+# 1. Kill old x11vnc or Xvnc on 5901 and clean lock files
+pkill -9 -x x11vnc 2>/dev/null || true
+pkill -9 -x Xvnc 2>/dev/null || true
+fuser -k 5901/tcp 2>/dev/null || true
+rm -f /data/data/com.termux/files/usr/tmp/.X1-lock
+rm -f /data/data/com.termux/files/usr/tmp/.X11-unix/X1
+
+# 2. Start Xvnc directly on port 5901 for separate session
+setsid Xvnc :1 -geometry 1920x1080 -depth 24 -rfbport 5901 -SecurityTypes None > /data/data/com.termux/files/home/xvnc.log 2>&1 &
+sleep 2
+
+# 3. Launch isolated separate XFCE4 session using dbus-run-session on DISPLAY=:1
+setsid env DISPLAY=:1 dbus-run-session startxfce4 > /data/data/com.termux/files/home/xfce.log 2>&1 &
+sleep 2
+
+# 4. Force apply Windows 11 Light Mode theme on :1
+DISPLAY=:1 /data/data/com.termux/files/usr/bin/apply-windows-theme :1 >/dev/null 2>&1 &
+
+echo "Separate VNC Session running at 127.0.0.1:5901 (Display :1)"

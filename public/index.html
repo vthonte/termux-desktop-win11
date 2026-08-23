@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Termux Desktop Control Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 17l6-6-6-6M12 19h8"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Termux Desktop Hub</h1>
+          <p class="subtitle">Windows 11 Light Mode & RDP Server Switcher</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-open-app" class="btn btn-secondary" title="Bring Termux X11 App to front">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          Open X11 App
+        </button>
+        <button id="btn-toggle-x11" class="btn btn-primary">
+          <span class="status-dot" id="x11-dot"></span>
+          <span id="x11-toggle-text">Start X11 Server</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="content">
+      <!-- Status Row -->
+      <div class="metrics-grid">
+        <div class="glass-card metric-card">
+          <div class="metric-icon x11-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="label">X11 Server Status</span>
+            <span class="value" id="val-x11-status">Checking...</span>
+          </div>
+        </div>
+
+        <div class="glass-card metric-card">
+          <div class="metric-icon de-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="label">RDP Server Status</span>
+            <span class="value" id="val-rdp-status">Checking...</span>
+          </div>
+        </div>
+
+        <div class="glass-card metric-card">
+          <div class="metric-icon audio-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="label">PulseAudio Sound</span>
+            <span class="value" id="val-pulse-status">Inactive</span>
+          </div>
+        </div>
+
+        <div class="glass-card metric-card">
+          <div class="metric-icon disk-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12H2"/>
+              <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+              <line x1="6" y1="16" x2="6.01" y2="16"/>
+              <line x1="10" y1="16" x2="10.01" y2="16"/>
+            </svg>
+          </div>
+          <div class="metric-info">
+            <span class="label">Available Space</span>
+            <span class="value" id="val-storage-free">Calculating...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Bar -->
+      <section class="glass-card section-card">
+        <div class="section-header">
+          <h2>⚡ System Control Hub</h2>
+          <div class="pill-badge">System Actions</div>
+        </div>
+        <div class="actions-row">
+          <button id="btn-quick-start" class="btn btn-action">
+            <span class="icon">🚀</span> Start Native X11
+          </button>
+          <button id="btn-quick-rdp" class="btn btn-action" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white;">
+            <span class="icon">📡</span> Start RDP Server (Port 3390)
+          </button>
+          <button id="btn-quick-stop" class="btn btn-action btn-danger">
+            <span class="icon">🛑</span> Stop Everything
+          </button>
+          <button id="btn-clean-space" class="btn btn-action btn-accent">
+            <span class="icon">🧹</span> Clean Cache & Space
+          </button>
+        </div>
+      </section>
+
+      <!-- Desktop Environments -->
+      <section class="section-block">
+        <div class="section-header">
+          <h2>🖥️ Available Desktop Environments</h2>
+          <p>Windows 11 Light Mode Theme configured for XFCE4.</p>
+        </div>
+
+        <div class="desktop-grid" id="desktop-grid">
+          <!-- Cards rendered dynamically by app.js -->
+        </div>
+      </section>
+
+      <!-- Output / Logs Sheet -->
+      <section class="glass-card section-card log-section">
+        <div class="section-header">
+          <h2>💻 Action Console Log</h2>
+          <button id="btn-clear-log" class="btn-sm btn-ghost">Clear</button>
+        </div>
+        <pre id="console-output" class="console-box">Ready. Click any action or desktop environment above to launch.</pre>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Termux Desktop Hub • Running locally on Termux Android</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

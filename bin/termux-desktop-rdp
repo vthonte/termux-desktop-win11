@@ -1,0 +1,18 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export PATH=/data/data/com.termux/files/usr/bin:$PATH
+export DISPLAY=:1
+export TMPDIR=/data/data/com.termux/files/usr/tmp
+export XDG_RUNTIME_DIR=/data/data/com.termux/files/usr/tmp
+
+# 1. Ensure separate VNC session on :1 is active
+/data/data/com.termux/files/usr/bin/termux-desktop-vnc >/dev/null 2>&1 || true
+
+# 2. Clean stale RDP PID files
+pkill -9 -x xrdp 2>/dev/null || true
+rm -f /data/data/com.termux/files/usr/var/run/xrdp*.pid
+rm -rf /data/data/com.termux/files/usr/tmp/.xrdp
+
+# 3. Launch RDP Server on Port 3390
+setsid env PATH=$PATH TMPDIR=$TMPDIR xrdp -n > /data/data/com.termux/files/home/xrdp.log 2>&1 &
+
+echo "Separate RDP Server running on port 3390 (Display :1)"

@@ -1,0 +1,41 @@
+#!/data/data/com.termux/files/usr/bin/bash
+TARGET_DISP="${1:-${DISPLAY:-:0}}"
+export DISPLAY="$TARGET_DISP"
+export TMPDIR=/data/data/com.termux/files/usr/tmp
+export XDG_RUNTIME_DIR=/data/data/com.termux/files/usr/tmp
+
+# 1. Ensure config dirs exist
+mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/ ~/.config/gtk-3.0/
+
+# 2. Apply Windows 11 Light Mode Theme & Icon Pack via xfconf-query
+xfconf-query -c xsettings -p /Net/ThemeName -s "Fluent-Light" --create -t string 2>/dev/null || true
+xfconf-query -c xsettings -p /Net/IconThemeName -s "Fluent-light" --create -t string 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/theme -s "Fluent-Light" --create -t string 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/button_layout -s "|HMC" --create -t string 2>/dev/null || true
+
+# 3. Enable Desktop Icons (Files, Launchers, Trash)
+xfconf-query -c xfdesktop -p /desktop-icons/style -s 2 --create -t int 2>/dev/null || true
+
+# 4. Set Windows 11 Official Blue Logo Icon for Start Menu
+LOGO_PATH="/data/data/com.termux/files/usr/share/icons/windows-logo.png"
+if [ -f "$LOGO_PATH" ]; then
+    xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-icon -s "$LOGO_PATH" --create -t string 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s "Start" --create -t string 2>/dev/null || true
+fi
+
+# 5. Apply Windows 11 Light Bloom Wallpaper across ALL monitor workspaces
+WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/windows11-light.jpg"
+if [ -f "$WALLPAPER" ]; then
+    for m in monitor0 monitor1 monitorVNC monitorXvnc monitorX11 monitor0.0; do
+        xfconf-query -c xfdesktop -p /backdrop/screen0/$m/workspace0/last-image -s "$WALLPAPER" --create -t string 2>/dev/null || true
+        xfconf-query -c xfdesktop -p /backdrop/screen0/$m/workspace0/image-style -s 5 --create -t int 2>/dev/null || true
+    done
+fi
+
+# 6. Force reload window manager, panel, and desktop engine live for TARGET_DISP
+DISPLAY=$TARGET_DISP xfwm4 --replace >/dev/null 2>&1 &
+DISPLAY=$TARGET_DISP xfce4-panel --replace >/dev/null 2>&1 &
+pkill -9 -f "xfdesktop --display $TARGET_DISP" 2>/dev/null || true
+setsid env DISPLAY=$TARGET_DISP TMPDIR=$TMPDIR XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR xfdesktop --display $TARGET_DISP >/dev/null 2>&1 &
+
+echo "Windows 11 Light Mode Theme, Icons, and Light Bloom Wallpaper applied on $TARGET_DISP!"

@@ -1,0 +1,26 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export PATH=/data/data/com.termux/files/usr/bin:$PATH
+export DISPLAY=${DISPLAY:-:0}
+export TMPDIR=/data/data/com.termux/files/usr/tmp
+export XDG_RUNTIME_DIR=/data/data/com.termux/files/usr/tmp
+
+# Clean orphan sessions
+pkill -9 -f "xfce4-session|startxfce4|termux-x11" >/dev/null 2>&1 || true
+rm -f /data/data/com.termux/files/usr/tmp/.X0-lock
+rm -rf /data/data/com.termux/files/usr/tmp/.X11-unix/X0
+
+# Start X11 server
+termux-x11 :0 -ac > /data/data/com.termux/files/home/termux-x11.log 2>&1 &
+sleep 1.5
+
+# Start PulseAudio
+pulseaudio --start --load="module-native-protocol-tcp auth-anonymous=1" --exit-idle-time=-1 2>/dev/null || true
+
+# Start XFCE4 Desktop Session
+dbus-launch --exit-with-session startxfce4 > /data/data/com.termux/files/home/xfce.log 2>&1 &
+sleep 2
+
+# Apply Windows 11 Light Mode theme
+/data/data/com.termux/files/usr/bin/apply-windows-theme :0 >/dev/null 2>&1 &
+
+echo "Termux:X11 Windows 11 Desktop running on :0"
