@@ -8,4 +8,5 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
     fi
 fi
 
+/data/data/com.termux/files/usr/bin/xdotool mousemove 25 1060 2>/dev/null || true
 /data/data/com.termux/files/usr/bin/xfce4-popup-whiskermenu -p plugin-1 2>/dev/null || /data/data/com.termux/files/usr/bin/xfce4-popup-whiskermenu 2>/dev/null || true
