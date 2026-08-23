@@ -7,5 +7,5 @@ fi
 
 adb -s 127.0.0.1:5555 shell settings put global enable_freeform_support 1 2>/dev/null || true
 
-echo "Launching True Samsung DeX Virtual Widescreen Desktop Mode..."
-scrcpy -s 127.0.0.1:5555 --new-display=1920x1080/160 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop Mode" 2>&1
+echo "Launching Ultra-Fast Zero-Lag Samsung DeX Virtual Desktop Mode (1280x720)..."
+scrcpy -s 127.0.0.1:5555 --new-display=1280x720/140 --video-bit-rate=4M --max-fps=60 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop Mode (720p Fast)" 2>&1
