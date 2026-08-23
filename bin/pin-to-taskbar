@@ -3,7 +3,6 @@ export DISPLAY="${DISPLAY:-:1}"
 
 if [ -z "$1" ]; then
     echo "Usage: pin-to-taskbar /path/to/app.desktop"
-    echo "Example: pin-to-taskbar /data/data/com.termux/files/usr/share/applications/xfce4-terminal.desktop"
     exit 1
 fi
 
@@ -18,14 +17,28 @@ if [ -n "$DBUS_PATH" ]; then
     export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_PATH"
 fi
 
-# Add launcher plugin to panel-1
-NEXT_ID=$(xfconf-query -c xfce4-panel -p /plugins -l 2>/dev/null | grep -o 'plugin-[0-9]*' | sed 's/plugin-//' | sort -n | tail -n 1)
-NEXT_ID=$((NEXT_ID + 1))
-
-xfconf-query -c xfce4-panel -p "/plugins/plugin-$NEXT_ID" -s "launcher" --create -t string 2>/dev/null || true
-xfconf-query -c xfce4-panel -p "/plugins/plugin-$NEXT_ID/items" -a -t string -s "$DESKTOP_FILE" --create 2>/dev/null || true
-
-# Add to panel-1 plugin-ids array
+# Add new launcher plugin
 xfce4-panel --add=launcher "$DESKTOP_FILE" 2>/dev/null || true
+sleep 1
 
-echo "App $DESKTOP_FILE pinned to taskbar!"
+# Re-order panel-1 plugin-ids array so all launchers stay on the left near Start Menu
+PLUGINS=$(xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids 2>/dev/null | grep -v 'Value is an array')
+LAUNCHERS=$(echo "$PLUGINS" | grep -v -E '^(1|5|6|7|8|10|11|12|13)$')
+OTHERS=$(echo "$PLUGINS" | grep -E '^(5|6|7|8|10|11|12|13)$')
+
+CMD="xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -s 1"
+TYPES="-t int"
+
+for l in $LAUNCHERS; do
+    CMD="$CMD -s $l"
+    TYPES="$TYPES -t int"
+done
+
+for o in $OTHERS; do
+    CMD="$CMD -s $o"
+    TYPES="$TYPES -t int"
+done
+
+eval "$CMD $TYPES" 2>/dev/null || true
+
+echo "App $DESKTOP_FILE pinned to taskbar on the left!"
