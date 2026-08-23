@@ -45,9 +45,11 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     dconf write /net/launchpad/plank/docks/dock1/zoom-percent 150 2>/dev/null || true
     dconf write /net/launchpad/plank/docks/dock1/icon-size 52 2>/dev/null || true
 
-    # 5. Kill Windows Taskbar Panel & Stale Docks cleanly
-    pkill -9 -f xfce4-panel 2>/dev/null || true
-    pkill -9 -f plank 2>/dev/null || true
+    # 5. Hide Windows Taskbar Panel OFF-SCREEN & ALWAYS AUTO-HIDE so it never overlaps Plank
+    xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -s 2 --create -t int 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=2000" --create -t string 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/length -s 0 --create -t int 2>/dev/null || true
+    xfce4-panel -r >/dev/null 2>&1 &
 
     # Save current theme state
     echo "macos" > ~/.current_theme
@@ -76,13 +78,13 @@ else
         xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s "Start" --create -t string 2>/dev/null || true
     fi
 
-    # 6. Reset Windows 11 Taskbar Panel (Full Width 100%, 38px height, bottom position)
+    # 6. Reset Windows 11 Taskbar Panel (Full Width 100%, 38px height, bottom position, autohide=0)
     xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=1080" --create -t string 2>/dev/null || true
     xfconf-query -c xfce4-panel -p /panels/panel-1/size -s 38 --create -t int 2>/dev/null || true
     xfconf-query -c xfce4-panel -p /panels/panel-1/length -s 100 --create -t int 2>/dev/null || true
     xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -s 0 --create -t int 2>/dev/null || true
 
-    # Relaunch Windows Taskbar if missing
+    # Relaunch Windows Taskbar cleanly
     if ! pgrep -f xfce4-panel >/dev/null 2>&1; then
         xfce4-panel >/dev/null 2>&1 &
     else
@@ -118,6 +120,7 @@ sleep 1.5
 
 # If macOS Mode, launch Plank Dock FRESH
 if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
+    pkill -9 -f plank 2>/dev/null || true
     plank >/dev/null 2>&1 &
 fi
 
