@@ -45,11 +45,9 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     dconf write /net/launchpad/plank/docks/dock1/zoom-percent 150 2>/dev/null || true
     dconf write /net/launchpad/plank/docks/dock1/icon-size 52 2>/dev/null || true
 
-    # 5. Hide Windows Taskbar Panel OFF-SCREEN & ALWAYS AUTO-HIDE so it never overlaps Plank
-    xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -s 2 --create -t int 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=2000" --create -t string 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/length -s 0 --create -t int 2>/dev/null || true
-    xfce4-panel -r >/dev/null 2>&1 &
+    # 5. Hide Windows Taskbar Panel window completely from display via xdotool
+    xdotool search --class xfce4-panel windowunmap 2>/dev/null || true
+    pkill -9 -f plank 2>/dev/null || true
 
     # Save current theme state
     echo "macos" > ~/.current_theme
@@ -84,11 +82,11 @@ else
     xfconf-query -c xfce4-panel -p /panels/panel-1/length -s 100 --create -t int 2>/dev/null || true
     xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -s 0 --create -t int 2>/dev/null || true
 
-    # Relaunch Windows Taskbar cleanly
+    # Make Windows Taskbar window visible again via xdotool
+    xdotool search --class xfce4-panel windowmap 2>/dev/null || true
+
     if ! pgrep -f xfce4-panel >/dev/null 2>&1; then
         xfce4-panel >/dev/null 2>&1 &
-    else
-        xfce4-panel -r >/dev/null 2>&1 &
     fi
 
     # Save current theme state
@@ -116,12 +114,15 @@ else
 fi
 
 # Wait for Window Manager frame redraw to complete
-sleep 1.5
+sleep 1.0
 
-# If macOS Mode, launch Plank Dock FRESH
+# Ensure xfce4-panel visibility state matches chosen theme
 if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
+    xdotool search --class xfce4-panel windowunmap 2>/dev/null || true
     pkill -9 -f plank 2>/dev/null || true
     plank >/dev/null 2>&1 &
+else
+    xdotool search --class xfce4-panel windowmap 2>/dev/null || true
 fi
 
 echo "Theme [$THEME_CHOICE] applied glitch-free on $TARGET_DISP!"
