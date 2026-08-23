@@ -1,0 +1,25 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export DISPLAY="${DISPLAY:-:0}"
+
+cat << 'EOF' > ~/.dex_settings.json
+{
+  "profile_name": "⚡ Fast Real-Time Mode (Zero Lag)",
+  "video_codec": "h265",
+  "video_bitrate_mbps": 1,
+  "max_fps": 60,
+  "video_buffer_ms": 0,
+  "max_size_px": 960,
+  "render_driver": "opengl",
+  "turn_screen_off": false,
+  "stay_awake": true
+}
+EOF
+cp -f ~/.dex_settings.json ~/dex_settings.json
+
+echo "=========================================================="
+echo " ⚡ Switched to Ultra-Low Latency Real-Time Mode (960px, 0ms)"
+echo "=========================================================="
+
+pkill -f scrcpy 2>/dev/null || true
+sleep 1
+exec /data/data/com.termux/files/usr/bin/launch-dex
