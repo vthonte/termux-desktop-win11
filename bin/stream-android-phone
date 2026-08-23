@@ -1,6 +1,0 @@
-#!/data/data/com.termux/files/usr/bin/bash
-export PATH=/system/bin:/data/data/com.termux/files/usr/bin:$PATH
-export DISPLAY="${DISPLAY:-:1}"
-
-echo "[Android Mirror] Starting live Android phone stream in X11/RDP window..."
-/system/bin/screenrecord --output-format=h264 --size 1280x720 --time-limit 0 - | mpv - --untimed --no-cache --title="📱 Live Android Phone Screen" 2>&1
