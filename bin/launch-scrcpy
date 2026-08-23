@@ -1,0 +1,9 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export DISPLAY="${DISPLAY:-:1}"
+
+if ! adb devices | grep -q "127.0.0.1:5555.*device"; then
+    adb connect 127.0.0.1:5555 2>/dev/null || true
+fi
+
+echo "Launching Android Phone Screen in RDP window..."
+scrcpy -s 127.0.0.1:5555 --no-audio --window-title="📱 Android Phone Screen" 2>&1
