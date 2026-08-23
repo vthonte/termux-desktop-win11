@@ -1,0 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/bash
+SESSION_NAME="${1:-session_$(date +%s)}"
+echo "Creating new independent terminal session: [$SESSION_NAME]..."
+exec tmux new-session -s "$SESSION_NAME"
