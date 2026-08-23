@@ -1,9 +1,9 @@
 {
-  "profile_name": "Sub-5ms Zero-Drop Low-Latency",
+  "profile_name": "Zero Frame Drop Golden Profile",
   "video_codec": "h265",
   "video_bitrate_mbps": 2,
   "max_fps": 60,
-  "video_buffer_ms": 15,
+  "video_buffer_ms": 50,
   "max_size_px": 1280,
   "render_driver": "opengl",
   "turn_screen_off": true,
