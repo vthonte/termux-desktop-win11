@@ -30,13 +30,10 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     # 3. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/macos-wallpaper.jpg"
 
-    # 4. Start Menu / Apple Menu Title
-    xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s " Finder" --create -t string 2>/dev/null || true
+    # 4. Hide Windows Taskbar Panel completely
+    pkill -9 -f xfce4-panel 2>/dev/null || true
 
-    # 5. Move panel to TOP for macOS Top Menu Bar
-    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=0" --create -t string 2>/dev/null || true
-
-    # 6. Launch interactive macOS Plank Dock at bottom
+    # 5. Launch interactive macOS Plank Dock
     pkill -f plank 2>/dev/null || true
     proot-distro login ubuntu --bind /data/data/com.termux/files/usr/tmp/.X11-unix:/tmp/.X11-unix -- env DISPLAY="$TARGET_DISP" plank >/dev/null 2>&1 &
 
@@ -46,11 +43,13 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
 else
     echo "[Theme Switcher] Applying Windows 11 Light Mode Theme on $TARGET_DISP..."
     
-    # 1. Kill Plank Dock
-    pkill -f plank 2>/dev/null || true
+    # 1. Kill Plank Dock completely
+    pkill -9 -f plank 2>/dev/null || true
 
-    # 2. Move panel to BOTTOM for Windows 11 Taskbar
-    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=1080" --create -t string 2>/dev/null || true
+    # 2. Relaunch Windows 11 Taskbar Panel
+    if ! pgrep -f xfce4-panel >/dev/null 2>&1; then
+        dbus-launch xfce4-panel >/dev/null 2>&1 &
+    fi
 
     # 3. GTK & Icon Theme
     xfconf-query -c xsettings -p /Net/ThemeName -s "Fluent-Light" --create -t string 2>/dev/null || true
