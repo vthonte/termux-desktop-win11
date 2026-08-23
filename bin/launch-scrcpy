@@ -5,5 +5,5 @@ if ! adb devices | grep -q "127.0.0.1:5555.*device"; then
     adb connect 127.0.0.1:5555 2>/dev/null || true
 fi
 
-echo "Launching Android Phone Screen (Samsung DeX style: Physical Screen OFF)..."
-scrcpy -s 127.0.0.1:5555 --no-audio --turn-screen-off --stay-awake --window-title="📱 Android Phone Screen (DeX Mode)" 2>&1
+echo "Launching Lightweight Fast Software-Rendered Android Phone Screen..."
+scrcpy -s 127.0.0.1:5555 --render-driver=software --video-codec=h264 --video-encoder='c2.android.avc.encoder' --max-size=1280 --video-bit-rate=4M --max-fps=30 --display-buffer=0 --no-audio --turn-screen-off --stay-awake --window-title="📱 Android Phone Screen (Minimal GPU)" 2>&1
