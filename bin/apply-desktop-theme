@@ -6,7 +6,15 @@ export DISPLAY="$TARGET_DISP"
 export TMPDIR=/data/data/com.termux/files/usr/tmp
 export XDG_RUNTIME_DIR=/data/data/com.termux/files/usr/tmp
 
+DBUS_PATH=$(ls -t /data/data/com.termux/files/usr/tmp/dbus-* 2>/dev/null | grep -v 'dbus-1' | head -n 1)
+if [ -n "$DBUS_PATH" ]; then
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_PATH"
+fi
+
 mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/ ~/.config/gtk-3.0/
+
+# Enable Compositing for Plank Dock Transparency
+xfconf-query -c xfwm4 -p /general/use_compositing -s true --create -t bool 2>/dev/null || true
 
 if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme on $TARGET_DISP..."
@@ -22,17 +30,14 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     # 3. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/macos-wallpaper.jpg"
 
-    # 4. Start Menu / Apple Menu
+    # 4. Start Menu / Apple Menu Title
     xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s " Finder" --create -t string 2>/dev/null || true
 
-    # 5. Hide Windows 11 Taskbar and launch interactive macOS Plank Dock
-    pkill -f xfce4-panel 2>/dev/null || true
+    # 5. Move panel to TOP for macOS Top Menu Bar
+    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=0" --create -t string 2>/dev/null || true
+
+    # 6. Launch interactive macOS Plank Dock at bottom
     pkill -f plank 2>/dev/null || true
-    sleep 1
-    DBUS_PATH=$(ls -t /data/data/com.termux/files/usr/tmp/dbus-* 2>/dev/null | grep -v 'dbus-1' | head -n 1)
-    if [ -n "$DBUS_PATH" ]; then
-        export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_PATH"
-    fi
     proot-distro login ubuntu --bind /data/data/com.termux/files/usr/tmp/.X11-unix:/tmp/.X11-unix -- env DISPLAY="$TARGET_DISP" plank >/dev/null 2>&1 &
 
     # Save current theme state
@@ -40,28 +45,25 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
 
 else
     echo "[Theme Switcher] Applying Windows 11 Light Mode Theme on $TARGET_DISP..."
+    
+    # 1. Kill Plank Dock
     pkill -f plank 2>/dev/null || true
-    pkill -f xfce4-panel 2>/dev/null || true
-    sleep 1
 
-    DBUS_PATH=$(ls -t /data/data/com.termux/files/usr/tmp/dbus-* 2>/dev/null | grep -v 'dbus-1' | head -n 1)
-    if [ -n "$DBUS_PATH" ]; then
-        export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_PATH"
-    fi
-    dbus-launch xfce4-panel >/dev/null 2>&1 &
+    # 2. Move panel to BOTTOM for Windows 11 Taskbar
+    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=1080" --create -t string 2>/dev/null || true
 
-    # 1. GTK & Icon Theme
+    # 3. GTK & Icon Theme
     xfconf-query -c xsettings -p /Net/ThemeName -s "Fluent-Light" --create -t string 2>/dev/null || true
     xfconf-query -c xsettings -p /Net/IconThemeName -s "Fluent-light" --create -t string 2>/dev/null || true
     xfconf-query -c xfwm4 -p /general/theme -s "Fluent-Light" --create -t string 2>/dev/null || true
     
-    # 2. Window Control Buttons: Right-aligned Windows buttons |HMC (Hide, Maximize, Close)
+    # 4. Window Control Buttons: Right-aligned Windows buttons |HMC (Hide, Maximize, Close)
     xfconf-query -c xfwm4 -p /general/button_layout -s "|HMC" --create -t string 2>/dev/null || true
 
-    # 3. Wallpaper
+    # 5. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/windows11-light.jpg"
 
-    # 4. Start Menu Logo & Title
+    # 6. Start Menu Logo & Title
     LOGO_PATH="/data/data/com.termux/files/usr/share/icons/windows-logo.png"
     if [ -f "$LOGO_PATH" ]; then
         xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-icon -s "$LOGO_PATH" --create -t string 2>/dev/null || true
@@ -72,36 +74,16 @@ else
     echo "win11" > ~/.current_theme
 fi
 
-# Bind Alt+F1, Ctrl+Esc, and Super+R under both commands and xfwm4 custom shortcuts
-for prefix in "/commands/custom" "/xfwm4/custom"; do
-    xfconf-query -c xfce4-keyboard-shortcuts -p "$prefix/<Alt>F1" -s "/data/data/com.termux/files/usr/bin/open-start-menu" --create -t string 2>/dev/null || true
-    xfconf-query -c xfce4-keyboard-shortcuts -p "$prefix/<Primary>Escape" -s "/data/data/com.termux/files/usr/bin/open-start-menu" --create -t string 2>/dev/null || true
-    xfconf-query -c xfce4-keyboard-shortcuts -p "$prefix/<Super>r" -s "xfce4-appfinder -r" --create -t string 2>/dev/null || true
-done
-
-# Enable Desktop Icons (Files, Launchers, Trash)
-xfconf-query -c xfdesktop -p /desktop-icons/style -s 2 --create -t int 2>/dev/null || true
-
-# Apply Wallpaper across all virtual monitors
+# Set Wallpaper
 if [ -f "$WALLPAPER" ]; then
-    for m in monitor0 monitor1 monitorVNC monitorXvnc monitorX11 monitor0.0; do
-        xfconf-query -c xfdesktop -p /backdrop/screen0/$m/workspace0/last-image -s "$WALLPAPER" --create -t string 2>/dev/null || true
-        xfconf-query -c xfdesktop -p /backdrop/screen0/$m/workspace0/image-style -s 5 --create -t int 2>/dev/null || true
+    DESKTOP_PROPS=$(xfconf-query -c xfdesktop -l 2>/dev/null | grep last-image | head -n 5)
+    for prop in $DESKTOP_PROPS; do
+        xfconf-query -c xfdesktop -p "$prop" -s "$WALLPAPER" 2>/dev/null || true
     done
 fi
 
-# Attach to active DBUS session if available
-if pgrep -f xfce4-session >/dev/null 2>&1; then
-    XFCE_PID=$(pgrep -f xfce4-session | head -n 1)
-    if [ -f "/proc/$XFCE_PID/environ" ]; then
-        export DBUS_SESSION_BUS_ADDRESS=$(xargs -0 -L1 -a "/proc/$XFCE_PID/environ" 2>/dev/null | grep DBUS_SESSION_BUS_ADDRESS | cut -d= -f2-)
-    fi
-fi
+# Force XFCE Settings & Window Manager to reload themes and icons live in memory
+xfsettingsd --replace >/dev/null 2>&1 &
+xfwm4 --replace >/dev/null 2>&1 &
 
-# Force reload window manager, panel, and desktop engine live for TARGET_DISP
-DISPLAY=$TARGET_DISP xfwm4 --replace >/dev/null 2>&1 &
-DISPLAY=$TARGET_DISP xfce4-panel --replace >/dev/null 2>&1 &
-pkill -9 -f "xfdesktop --display $TARGET_DISP" 2>/dev/null || true
-setsid env DISPLAY=$TARGET_DISP TMPDIR=$TMPDIR XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR xfdesktop --display $TARGET_DISP >/dev/null 2>&1 &
-
-echo "Theme [$THEME_CHOICE] applied successfully on $TARGET_DISP with window buttons [$(xfconf-query -c xfwm4 -p /general/button_layout)]!"
+echo "Theme [$THEME_CHOICE] applied successfully on $TARGET_DISP!"
