@@ -1,0 +1,15 @@
+#!/data/data/com.termux/files/usr/bin/bash
+echo "[Termux Desktop] Stopping remote RDP server and session (:1)..."
+
+pkill -9 -x xrdp 2>/dev/null || true
+pkill -9 -x xrdp-sesman 2>/dev/null || true
+pkill -9 -x Xvnc 2>/dev/null || true
+pkill -9 -f "xfdesktop --display :1" 2>/dev/null || true
+fuser -k 5901/tcp 2>/dev/null || true
+fuser -k 3390/tcp 2>/dev/null || true
+
+rm -f /data/data/com.termux/files/usr/tmp/.X1-lock
+rm -rf /data/data/com.termux/files/usr/tmp/.X11-unix/X1
+rm -f /data/data/com.termux/files/usr/var/run/xrdp*.pid
+
+echo "[Termux Desktop] RDP server stopped."

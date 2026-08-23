@@ -1,0 +1,14 @@
+#!/data/data/com.termux/files/usr/bin/bash
+CURRENT_THEME="win11"
+if [ -f ~/.current_theme ]; then
+    CURRENT_THEME=$(cat ~/.current_theme)
+fi
+
+if [ "$CURRENT_THEME" = "win11" ]; then
+    NEXT_THEME="macos"
+else
+    NEXT_THEME="win11"
+fi
+
+echo "Switching theme from [$CURRENT_THEME] to [$NEXT_THEME]..."
+/data/data/com.termux/files/usr/bin/apply-desktop-theme "$NEXT_THEME" "${1:-${DISPLAY:-:0}}"

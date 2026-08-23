@@ -1,0 +1,73 @@
+#!/data/data/com.termux/files/usr/bin/bash
+THEME_CHOICE="${1:-win11}"
+TARGET_DISP="${2:-${DISPLAY:-:0}}"
+
+export DISPLAY="$TARGET_DISP"
+export TMPDIR=/data/data/com.termux/files/usr/tmp
+export XDG_RUNTIME_DIR=/data/data/com.termux/files/usr/tmp
+
+mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/ ~/.config/gtk-3.0/
+
+if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
+    echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme on $TARGET_DISP..."
+    
+    # 1. GTK & Icon Theme
+    xfconf-query -c xsettings -p /Net/ThemeName -s "WhiteSur-Dark" --create -t string 2>/dev/null || true
+    xfconf-query -c xsettings -p /Net/IconThemeName -s "WhiteSur-dark" --create -t string 2>/dev/null || true
+    xfconf-query -c xfwm4 -p /general/theme -s "WhiteSur-Dark" --create -t string 2>/dev/null || true
+    
+    # 2. Window Control Buttons: Left-aligned macOS traffic lights (Close, Minimize, Maximize)
+    xfconf-query -c xfwm4 -p /general/button_layout -s "close,minimize,maximize|" --create -t string 2>/dev/null || true
+
+    # 3. Wallpaper
+    WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/macos-wallpaper.jpg"
+
+    # 4. Start Menu / Apple Menu
+    xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s " Finder" --create -t string 2>/dev/null || true
+
+    # Save current theme state
+    echo "macos" > ~/.current_theme
+
+else
+    echo "[Theme Switcher] Applying Windows 11 Light Mode Theme on $TARGET_DISP..."
+
+    # 1. GTK & Icon Theme
+    xfconf-query -c xsettings -p /Net/ThemeName -s "Fluent-Light" --create -t string 2>/dev/null || true
+    xfconf-query -c xsettings -p /Net/IconThemeName -s "Fluent-light" --create -t string 2>/dev/null || true
+    xfconf-query -c xfwm4 -p /general/theme -s "Fluent-Light" --create -t string 2>/dev/null || true
+    
+    # 2. Window Control Buttons: Right-aligned Windows buttons
+    xfconf-query -c xfwm4 -p /general/button_layout -s "|HMC" --create -t string 2>/dev/null || true
+
+    # 3. Wallpaper
+    WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/windows11-light.jpg"
+
+    # 4. Start Menu Logo & Title
+    LOGO_PATH="/data/data/com.termux/files/usr/share/icons/windows-logo.png"
+    if [ -f "$LOGO_PATH" ]; then
+        xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-icon -s "$LOGO_PATH" --create -t string 2>/dev/null || true
+        xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s "Start" --create -t string 2>/dev/null || true
+    fi
+
+    # Save current theme state
+    echo "win11" > ~/.current_theme
+fi
+
+# Enable Desktop Icons (Files, Launchers, Trash)
+xfconf-query -c xfdesktop -p /desktop-icons/style -s 2 --create -t int 2>/dev/null || true
+
+# Apply Wallpaper across all virtual monitors
+if [ -f "$WALLPAPER" ]; then
+    for m in monitor0 monitor1 monitorVNC monitorXvnc monitorX11 monitor0.0; do
+        xfconf-query -c xfdesktop -p /backdrop/screen0/$m/workspace0/last-image -s "$WALLPAPER" --create -t string 2>/dev/null || true
+        xfconf-query -c xfdesktop -p /backdrop/screen0/$m/workspace0/image-style -s 5 --create -t int 2>/dev/null || true
+    done
+fi
+
+# Force reload window manager, panel, and desktop engine live for TARGET_DISP
+DISPLAY=$TARGET_DISP xfwm4 --replace >/dev/null 2>&1 &
+DISPLAY=$TARGET_DISP xfce4-panel --replace >/dev/null 2>&1 &
+pkill -9 -f "xfdesktop --display $TARGET_DISP" 2>/dev/null || true
+setsid env DISPLAY=$TARGET_DISP TMPDIR=$TMPDIR XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR xfdesktop --display $TARGET_DISP >/dev/null 2>&1 &
+
+echo "Theme [$THEME_CHOICE] applied successfully on $TARGET_DISP!"
