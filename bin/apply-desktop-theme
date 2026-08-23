@@ -53,6 +53,9 @@ else
     echo "win11" > ~/.current_theme
 fi
 
+# Bind Windows + R to Windows Run Box (xfce4-appfinder -r)
+xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Super>r" -s "xfce4-appfinder -r" --create -t string 2>/dev/null || true
+
 # Bind Windows Key (Super_L), Ctrl+Esc, and Alt+F1 to open Start Menu via D-Bus wrapper
 xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/Super_L" -s "/data/data/com.termux/files/usr/bin/open-start-menu" --create -t string 2>/dev/null || true
 xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/<Primary>Escape" -s "/data/data/com.termux/files/usr/bin/open-start-menu" --create -t string 2>/dev/null || true
