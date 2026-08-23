@@ -10,7 +10,9 @@ adb -s 127.0.0.1:5555 shell settings put system accelerometer_rotation 0 2>/dev/
 adb -s 127.0.0.1:5555 shell settings put system user_rotation 1 2>/dev/null || true
 adb -s 127.0.0.1:5555 shell settings put global enable_freeform_support 1 2>/dev/null || true
 
-echo "Launching High-Resolution OpenGL Hardware-Accelerated DeX Desktop (1600px HD with Default FPS Logging)..."
-pkill -f "📊 DeX FPS Stats" 2>/dev/null || true
-DISPLAY=:1 dbus-launch xfce4-terminal --title="📊 DeX FPS Stats" --geometry=40x6-20+35 -e "/data/data/com.termux/files/usr/bin/dex-fps-monitor" >/dev/null 2>&1 &
-exec scrcpy -s 127.0.0.1:5555 --render-driver=opengl --max-size=1600 --video-bit-rate=4M --max-fps=60 --print-fps --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop (60 FPS Stats Active)" > /data/data/com.termux/files/home/fps.log 2>&1
+echo "Launching High-Resolution OpenGL Hardware-Accelerated DeX Desktop (1600px HD with Live HUD Overlay)..."
+pkill -f "DeX FPS Stats" 2>/dev/null || true
+pkill -f dex-hud-overlay 2>/dev/null || true
+DISPLAY=:1 /data/data/com.termux/files/usr/bin/dex-hud-overlay >/dev/null 2>&1 &
+
+exec scrcpy -s 127.0.0.1:5555 --render-driver=opengl --max-size=1600 --video-bit-rate=4M --max-fps=60 --print-fps --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop" > /data/data/com.termux/files/home/fps.log 2>&1
