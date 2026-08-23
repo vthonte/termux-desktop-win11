@@ -34,8 +34,8 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     xfconf-query -c xsettings -p /Net/IconThemeName -s "WhiteSur-dark" --create -t string 2>/dev/null || true
     xfconf-query -c xfwm4 -p /general/theme -s "WhiteSur-Dark" --create -t string 2>/dev/null || true
     
-    # 2. Window Control Buttons: Left-aligned macOS traffic lights CHM| (Close, Hide, Maximize)
-    xfconf-query -c xfwm4 -p /general/button_layout -s "CHM|" --create -t string 2>/dev/null || true
+    # 2. Window Control Buttons: Left-aligned macOS traffic lights CMH| (Close, Maximize, Hide)
+    xfconf-query -c xfwm4 -p /general/button_layout -s "CMH|" --create -t string 2>/dev/null || true
 
     # 3. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/macos-wallpaper.jpg"
@@ -63,8 +63,8 @@ else
     xfconf-query -c xsettings -p /Net/IconThemeName -s "Fluent-light" --create -t string 2>/dev/null || true
     xfconf-query -c xfwm4 -p /general/theme -s "Fluent-Light" --create -t string 2>/dev/null || true
     
-    # 3. Window Control Buttons: Right-aligned Windows buttons |HMC (Hide, Maximize, Close)
-    xfconf-query -c xfwm4 -p /general/button_layout -s "|HMC" --create -t string 2>/dev/null || true
+    # 3. Window Control Buttons: Right-aligned Windows buttons O|HMC (Option menu | Hide, Maximize, Close)
+    xfconf-query -c xfwm4 -p /general/button_layout -s "O|HMC" --create -t string 2>/dev/null || true
 
     # 4. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/windows11-light.jpg"
