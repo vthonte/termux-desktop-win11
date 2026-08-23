@@ -64,8 +64,16 @@ if [ -f "$WALLPAPER" ]; then
     done
 fi
 
+# Attach to active DBUS session if available
+if pgrep -f xfce4-session >/dev/null 2>&1; then
+    XFCE_PID=$(pgrep -f xfce4-session | head -n 1)
+    if [ -f "/proc/$XFCE_PID/environ" ]; then
+        export DBUS_SESSION_BUS_ADDRESS=$(xargs -0 -L1 -a "/proc/$XFCE_PID/environ" 2>/dev/null | grep DBUS_SESSION_BUS_ADDRESS | cut -d= -f2-)
+    fi
+fi
+
 # Force reload window manager, panel, and desktop engine live for TARGET_DISP
-DISPLAY=$TARGET_DISP dbus-launch xfwm4 --replace >/dev/null 2>&1 &
+DISPLAY=$TARGET_DISP xfwm4 --replace >/dev/null 2>&1 &
 DISPLAY=$TARGET_DISP xfce4-panel --replace >/dev/null 2>&1 &
 pkill -9 -f "xfdesktop --display $TARGET_DISP" 2>/dev/null || true
 setsid env DISPLAY=$TARGET_DISP TMPDIR=$TMPDIR XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR xfdesktop --display $TARGET_DISP >/dev/null 2>&1 &
