@@ -18,6 +18,14 @@ try:
 except Exception:
     pass
 
+# Dismiss Keyguard lock screen overlay in memory so activity routes to active scrcpy window
+try:
+    subprocess.run("/data/data/com.termux/files/usr/bin/am start -a android.intent.action.MAIN -c android.intent.category.HOME 2>/dev/null", shell=True)
+    subprocess.run("wm dismiss-keyguard 2>/dev/null", shell=True)
+    subprocess.run("input keyevent 82 2>/dev/null", shell=True)
+except Exception:
+    pass
+
 parts = package.split('.')
 last_part = parts[-1]
 second_part = parts[1] if len(parts) > 1 else ""
