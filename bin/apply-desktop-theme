@@ -27,7 +27,7 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
 
     # 5. Launch interactive macOS Plank Dock with live hover magnification
     pkill -f plank 2>/dev/null || true
-    proot-distro login ubuntu --bind /data/data/com.termux/files/usr/tmp/.X11-unix:/tmp/.X11-unix -- env DISPLAY="$TARGET_DISP" plank --theme=Matte >/dev/null 2>&1 &
+    proot-distro login ubuntu --bind /data/data/com.termux/files/usr/tmp/.X11-unix:/tmp/.X11-unix -- env DISPLAY="$TARGET_DISP" plank >/dev/null 2>&1 &
 
     # Save current theme state
     echo "macos" > ~/.current_theme
