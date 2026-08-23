@@ -19,6 +19,7 @@ if [ -f "$SETTINGS_FILE" ]; then
     BUFFER=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('video_buffer_ms', 15))")
     MAX_SIZE=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('max_size_px', 1280))")
     RENDERER=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('render_driver', 'opengl'))")
+    SCREEN_OFF=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print('true' if d.get('turn_screen_off', False) else 'false')")
     PROFILE=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('profile_name', 'Custom Profile'))")
 else
     CODEC="h265"
@@ -27,15 +28,21 @@ else
     BUFFER=15
     MAX_SIZE=1280
     RENDERER="opengl"
+    SCREEN_OFF="false"
     PROFILE="Default Sub-5ms Profile"
+fi
+
+SCREEN_OFF_ARG=""
+if [ "$SCREEN_OFF" = "true" ]; then
+    SCREEN_OFF_ARG="--turn-screen-off"
 fi
 
 echo "=========================================================="
 echo " Launching DeX Desktop with Custom JSON Profile: $PROFILE"
-echo " Codec: $CODEC | Bitrate: $BITRATE | FPS: $FPS | Buffer: ${BUFFER}ms"
+echo " Codec: $CODEC | Bitrate: $BITRATE | FPS: $FPS | Screen Off: $SCREEN_OFF"
 echo "=========================================================="
 
 pkill -f "DeX FPS Stats" 2>/dev/null || true
 pkill -f dex-hud-overlay 2>/dev/null || true
 
-exec scrcpy -s 127.0.0.1:5555 --render-driver="$RENDERER" --video-codec="$CODEC" --video-bit-rate="$BITRATE" --max-size="$MAX_SIZE" --max-fps="$FPS" --video-buffer="$BUFFER" --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop ($PROFILE)" 2>&1
+exec scrcpy -s 127.0.0.1:5555 --render-driver="$RENDERER" --video-codec="$CODEC" --video-bit-rate="$BITRATE" --max-size="$MAX_SIZE" --max-fps="$FPS" --video-buffer="$BUFFER" --no-audio $SCREEN_OFF_ARG --stay-awake --window-title="🖥️ Samsung DeX Desktop ($PROFILE)" 2>&1

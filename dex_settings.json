@@ -6,6 +6,6 @@
   "video_buffer_ms": 15,
   "max_size_px": 1280,
   "render_driver": "opengl",
-  "turn_screen_off": true,
+  "turn_screen_off": false,
   "stay_awake": true
 }
