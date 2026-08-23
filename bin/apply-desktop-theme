@@ -13,7 +13,7 @@ fi
 
 mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/ ~/.config/gtk-3.0/
 
-# Enable Compositing for Cairo-Dock 3D Effects and Transparency
+# Ensure Compositing is ON for Cairo-Dock 3D Hover & Transparency
 xfconf-query -c xfwm4 -p /general/use_compositing -s true --create -t bool 2>/dev/null || true
 
 # Global System Font, Title, and Desktop Icon Scaling (120 DPI = 125% Large Text)
@@ -24,7 +24,7 @@ xfconf-query -c xfwm4 -p /general/title_font -s "Inter Bold 13" --create -t stri
 xfconf-query -c xfdesktop -p /desktop-icons/font-size -s 13 --create -t int 2>/dev/null || true
 
 if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
-    echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme with Large Cairo-Dock on $TARGET_DISP..."
+    echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme on $TARGET_DISP..."
     
     # 1. GTK & Icon Theme
     xfconf-query -c xsettings -p /Net/ThemeName -s "WhiteSur-Dark" --create -t string 2>/dev/null || true
@@ -37,13 +37,10 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     # 3. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/macos-wallpaper.jpg"
 
-    # 4. Hide Windows Taskbar Panel completely
+    # 4. Kill Windows Taskbar & Stale Docks cleanly
     pkill -9 -f xfce4-panel 2>/dev/null || true
-    pkill -9 -f plank 2>/dev/null || true
-
-    # 5. Launch Large 3D Animated Cairo-Dock
     pkill -9 -f cairo-dock 2>/dev/null || true
-    cairo-dock -c >/dev/null 2>&1 &
+    pkill -9 -f plank 2>/dev/null || true
 
     # Save current theme state
     echo "macos" > ~/.current_theme
@@ -51,31 +48,39 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
 else
     echo "[Theme Switcher] Applying Windows 11 Light Mode Theme on $TARGET_DISP..."
     
-    # 1. Kill Cairo-Dock & Plank
+    # 1. Kill Docks cleanly
     pkill -9 -f cairo-dock 2>/dev/null || true
     pkill -9 -f plank 2>/dev/null || true
 
-    # 2. Relaunch Windows 11 Taskbar Panel
-    if ! pgrep -f xfce4-panel >/dev/null 2>&1; then
-        xfce4-panel >/dev/null 2>&1 &
-    fi
-
-    # 3. GTK & Icon Theme
+    # 2. GTK & Icon Theme
     xfconf-query -c xsettings -p /Net/ThemeName -s "Fluent-Light" --create -t string 2>/dev/null || true
     xfconf-query -c xsettings -p /Net/IconThemeName -s "Fluent-light" --create -t string 2>/dev/null || true
     xfconf-query -c xfwm4 -p /general/theme -s "Fluent-Light" --create -t string 2>/dev/null || true
     
-    # 4. Window Control Buttons: Right-aligned Windows buttons |HMC (Hide, Maximize, Close)
+    # 3. Window Control Buttons: Right-aligned Windows buttons |HMC (Hide, Maximize, Close)
     xfconf-query -c xfwm4 -p /general/button_layout -s "|HMC" --create -t string 2>/dev/null || true
 
-    # 5. Wallpaper
+    # 4. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/windows11-light.jpg"
 
-    # 6. Start Menu Logo & Title
+    # 5. Start Menu Logo & Title
     LOGO_PATH="/data/data/com.termux/files/usr/share/icons/windows-logo.png"
     if [ -f "$LOGO_PATH" ]; then
         xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-icon -s "$LOGO_PATH" --create -t string 2>/dev/null || true
         xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s "Start" --create -t string 2>/dev/null || true
+    fi
+
+    # 6. Reset Windows 11 Taskbar Panel (Full Width 100%, 38px height, bottom position)
+    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=1080" --create -t string 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/size -s 38 --create -t int 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/length -s 100 --create -t int 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -s 0 --create -t int 2>/dev/null || true
+
+    # Relaunch Windows Taskbar if missing
+    if ! pgrep -f xfce4-panel >/dev/null 2>&1; then
+        xfce4-panel >/dev/null 2>&1 &
+    else
+        xfce4-panel -r >/dev/null 2>&1 &
     fi
 
     # Save current theme state
@@ -94,4 +99,12 @@ fi
 xfsettingsd --replace >/dev/null 2>&1 &
 xfwm4 --replace >/dev/null 2>&1 &
 
-echo "Theme [$THEME_CHOICE] applied successfully on $TARGET_DISP with enlarged system fonts!"
+# Wait for Window Manager frame redraw to complete
+sleep 1.5
+
+# If macOS Mode, launch Cairo-Dock FRESH so mouse hover input grabs cleanly!
+if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
+    cairo-dock -c >/dev/null 2>&1 &
+fi
+
+echo "Theme [$THEME_CHOICE] applied successfully on $TARGET_DISP!"
