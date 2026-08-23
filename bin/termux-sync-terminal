@@ -1,0 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# Real-Time Synchronized Terminal Session Engine
+if [ -z "$TMUX" ]; then
+    exec tmux new-session -A -s main
+fi
