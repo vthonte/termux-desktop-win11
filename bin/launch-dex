@@ -10,8 +10,32 @@ adb -s 127.0.0.1:5555 shell settings put system accelerometer_rotation 0 2>/dev/
 adb -s 127.0.0.1:5555 shell settings put system user_rotation 1 2>/dev/null || true
 adb -s 127.0.0.1:5555 shell settings put global enable_freeform_support 1 2>/dev/null || true
 
-echo "Launching 5-Second Deep Buffer Experiment DeX Desktop (5000ms Buffer)..."
+SETTINGS_FILE="$HOME/dex_settings.json"
+
+if [ -f "$SETTINGS_FILE" ]; then
+    CODEC=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('video_codec', 'h265'))")
+    BITRATE=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(str(d.get('video_bitrate_mbps', 2)) + 'M')")
+    FPS=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('max_fps', 60))")
+    BUFFER=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('video_buffer_ms', 15))")
+    MAX_SIZE=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('max_size_px', 1280))")
+    RENDERER=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('render_driver', 'opengl'))")
+    PROFILE=$(python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); print(d.get('profile_name', 'Custom Profile'))")
+else
+    CODEC="h265"
+    BITRATE="2M"
+    FPS=60
+    BUFFER=15
+    MAX_SIZE=1280
+    RENDERER="opengl"
+    PROFILE="Default Sub-5ms Profile"
+fi
+
+echo "=========================================================="
+echo " Launching DeX Desktop with Custom JSON Profile: $PROFILE"
+echo " Codec: $CODEC | Bitrate: $BITRATE | FPS: $FPS | Buffer: ${BUFFER}ms"
+echo "=========================================================="
+
 pkill -f "DeX FPS Stats" 2>/dev/null || true
 pkill -f dex-hud-overlay 2>/dev/null || true
 
-exec scrcpy -s 127.0.0.1:5555 --render-driver=opengl --video-codec=h265 --video-bit-rate=2M --max-size=1280 --max-fps=60 --video-buffer=5000 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop (5s Buffer Experiment)" 2>&1
+exec scrcpy -s 127.0.0.1:5555 --render-driver="$RENDERER" --video-codec="$CODEC" --video-bit-rate="$BITRATE" --max-size="$MAX_SIZE" --max-fps="$FPS" --video-buffer="$BUFFER" --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop ($PROFILE)" 2>&1
