@@ -1,0 +1,8 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export DISPLAY="${DISPLAY:-:1}"
+echo "=================================================="
+echo "      📊 Samsung DeX Real-Time FPS Monitor      "
+echo "=================================================="
+echo "Streaming live FPS and frame stats from scrcpy..."
+echo ""
+exec tail -f /data/data/com.termux/files/home/fps.log
