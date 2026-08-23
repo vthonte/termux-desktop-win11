@@ -5,9 +5,10 @@ if ! adb devices | grep -q "127.0.0.1:5555.*device"; then
     adb connect 127.0.0.1:5555 2>/dev/null || true
 fi
 
+# Force Android Native System Widescreen Landscape Rotation
 adb -s 127.0.0.1:5555 shell settings put system accelerometer_rotation 0 2>/dev/null || true
 adb -s 127.0.0.1:5555 shell settings put system user_rotation 1 2>/dev/null || true
 adb -s 127.0.0.1:5555 shell settings put global enable_freeform_support 1 2>/dev/null || true
 
-echo "Launching High-Resolution OpenGL Hardware-Accelerated DeX Desktop (1600px HD)..."
-scrcpy -s 127.0.0.1:5555 --render-driver=opengl --max-size=1600 --video-bit-rate=8M --max-fps=60 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop (1600px OpenGL HD)" 2>&1
+echo "Launching Samsung DeX Desktop (Lock Screen Unlock Enabled)..."
+scrcpy -s 127.0.0.1:5555 --render-driver=opengl --max-size=1600 --video-bit-rate=8M --max-fps=60 --no-audio --turn-screen-off --stay-awake --unlock --window-title="🖥️ Samsung DeX Desktop" 2>&1
