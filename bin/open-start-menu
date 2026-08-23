@@ -1,3 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/bash
 export DISPLAY="${DISPLAY:-:1}"
-exec /data/data/com.termux/files/usr/bin/dbus-launch /data/data/com.termux/files/usr/bin/xfce4-appfinder
+
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    XFCE_PID=$(pgrep -f xfce4-session 2>/dev/null | head -n 1)
+    if [ -n "$XFCE_PID" ] && [ -f "/proc/$XFCE_PID/environ" ]; then
+        export DBUS_SESSION_BUS_ADDRESS=$(xargs -0 -L1 -a "/proc/$XFCE_PID/environ" 2>/dev/null | grep DBUS_SESSION_BUS_ADDRESS | cut -d= -f2-)
+    fi
+fi
+
+/data/data/com.termux/files/usr/bin/xfce4-popup-whiskermenu -p plugin-1 2>/dev/null || /data/data/com.termux/files/usr/bin/xfce4-popup-whiskermenu 2>/dev/null || true
