@@ -11,8 +11,8 @@ fuser -k 5901/tcp 2>/dev/null || true
 rm -f /data/data/com.termux/files/usr/tmp/.X1-lock
 rm -f /data/data/com.termux/files/usr/tmp/.X11-unix/X1
 
-# 2. Start Xvnc directly on port 5901 for separate session with zero frame deferral
-setsid Xvnc :1 -geometry 1920x1080 -depth 24 -rfbport 5901 -defer 0 -SecurityTypes None > /data/data/com.termux/files/home/xvnc.log 2>&1 &
+# 2. Start Xvnc directly on port 5901 for separate session
+setsid Xvnc :1 -geometry 1920x1080 -depth 24 -rfbport 5901 -SecurityTypes None > /data/data/com.termux/files/home/xvnc.log 2>&1 &
 sleep 2
 
 # 3. Launch isolated separate XFCE4 session using dbus-run-session on DISPLAY=:1
