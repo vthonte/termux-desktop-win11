@@ -19,7 +19,9 @@ sleep 2
 setsid env DISPLAY=:1 dbus-run-session startxfce4 > /data/data/com.termux/files/home/xfce.log 2>&1 &
 sleep 2
 
-# 4. Force apply Windows 11 Light Mode theme on :1
-DISPLAY=:1 /data/data/com.termux/files/usr/bin/apply-windows-theme :1 >/dev/null 2>&1 &
+# 4. Force apply Windows 11 Light Mode theme and xcape Super_L key mapping on :1
+pkill -f xcape 2>/dev/null || true
+DISPLAY=:1 xcape -e 'Super_L=Control_L|Escape' >/dev/null 2>&1 &
+DISPLAY=:1 /data/data/com.termux/files/usr/bin/apply-windows-theme >/dev/null 2>&1 &
 
 echo "Separate VNC Session running at 127.0.0.1:5901 (Display :1)"
