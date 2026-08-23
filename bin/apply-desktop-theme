@@ -48,7 +48,7 @@ else
 
     # 2. Relaunch Windows 11 Taskbar Panel
     if ! pgrep -f xfce4-panel >/dev/null 2>&1; then
-        dbus-launch xfce4-panel >/dev/null 2>&1 &
+        xfce4-panel >/dev/null 2>&1 &
     fi
 
     # 3. GTK & Icon Theme
@@ -81,7 +81,7 @@ if [ -f "$WALLPAPER" ]; then
     done
 fi
 
-# Force XFCE Settings & Window Manager to reload themes and icons live in memory
+# Force XFCE Settings & Window Manager to reload themes live
 xfsettingsd --replace >/dev/null 2>&1 &
 xfwm4 --replace >/dev/null 2>&1 &
 
