@@ -16,8 +16,15 @@ mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/ ~/.config/gtk-3.0/
 # Enable Compositing for Cairo-Dock 3D Effects and Transparency
 xfconf-query -c xfwm4 -p /general/use_compositing -s true --create -t bool 2>/dev/null || true
 
+# Global System Font, Title, and Desktop Icon Scaling (120 DPI = 125% Large Text)
+xfconf-query -c xsettings -p /Xft/DPI -s 120 --create -t int 2>/dev/null || true
+xfconf-query -c xsettings -p /Gtk/FontName -s "Inter 13" --create -t string 2>/dev/null || true
+xfconf-query -c xsettings -p /Gtk/MonospaceFontName -s "Cascadia Code 12" --create -t string 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/title_font -s "Inter Bold 13" --create -t string 2>/dev/null || true
+xfconf-query -c xfdesktop -p /desktop-icons/font-size -s 13 --create -t int 2>/dev/null || true
+
 if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
-    echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme with Cairo-Dock on $TARGET_DISP..."
+    echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme with Large Cairo-Dock on $TARGET_DISP..."
     
     # 1. GTK & Icon Theme
     xfconf-query -c xsettings -p /Net/ThemeName -s "WhiteSur-Dark" --create -t string 2>/dev/null || true
@@ -34,7 +41,7 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     pkill -9 -f xfce4-panel 2>/dev/null || true
     pkill -9 -f plank 2>/dev/null || true
 
-    # 5. Launch 3D Animated Cairo-Dock
+    # 5. Launch Large 3D Animated Cairo-Dock
     pkill -9 -f cairo-dock 2>/dev/null || true
     cairo-dock -c >/dev/null 2>&1 &
 
@@ -87,4 +94,4 @@ fi
 xfsettingsd --replace >/dev/null 2>&1 &
 xfwm4 --replace >/dev/null 2>&1 &
 
-echo "Theme [$THEME_CHOICE] applied successfully on $TARGET_DISP!"
+echo "Theme [$THEME_CHOICE] applied successfully on $TARGET_DISP with enlarged system fonts!"
