@@ -5,7 +5,9 @@ if ! adb devices | grep -q "127.0.0.1:5555.*device"; then
     adb connect 127.0.0.1:5555 2>/dev/null || true
 fi
 
+adb -s 127.0.0.1:5555 shell settings put system accelerometer_rotation 0 2>/dev/null || true
+adb -s 127.0.0.1:5555 shell settings put system user_rotation 1 2>/dev/null || true
 adb -s 127.0.0.1:5555 shell settings put global enable_freeform_support 1 2>/dev/null || true
 
-echo "Launching Samsung DeX Widescreen Desktop (Software 2D Mode)..."
-scrcpy -s 127.0.0.1:5555 --render-driver=software --display-orientation=90 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop" 2>&1
+echo "Launching Ultra-Fast 60 FPS True Native Landscape DeX Desktop..."
+scrcpy -s 127.0.0.1:5555 --render-driver=software --max-size=800 --video-bit-rate=2M --max-fps=60 --display-buffer=0 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop (Native Landscape)" 2>&1
