@@ -13,8 +13,11 @@ fi
 
 mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/ ~/.config/gtk-3.0/
 
-# Ensure Compositing is ON for Plank Dock Hover & Transparency
+# Fix XFWM4 Window & Popup Shadows to eliminate black borders & rendering glitches
 xfconf-query -c xfwm4 -p /general/use_compositing -s true --create -t bool 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/show_dock_shadows -s false --create -t bool 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/show_popup_shadows -s false --create -t bool 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/show_frame_shadows -s false --create -t bool 2>/dev/null || true
 
 # Global System Font, Title, and Desktop Icon Scaling (120 DPI = 125% Large Text)
 xfconf-query -c xsettings -p /Xft/DPI -s 120 --create -t int 2>/dev/null || true
@@ -37,7 +40,12 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     # 3. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/macos-wallpaper.jpg"
 
-    # 4. Kill Windows Taskbar Panel & Stale Docks cleanly
+    # 4. Configure Plank dconf hover magnification
+    dconf write /net/launchpad/plank/docks/dock1/zoom-enabled true 2>/dev/null || true
+    dconf write /net/launchpad/plank/docks/dock1/zoom-percent 150 2>/dev/null || true
+    dconf write /net/launchpad/plank/docks/dock1/icon-size 52 2>/dev/null || true
+
+    # 5. Kill Windows Taskbar Panel & Stale Docks cleanly
     pkill -9 -f xfce4-panel 2>/dev/null || true
     pkill -9 -f plank 2>/dev/null || true
 
@@ -105,4 +113,4 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     plank >/dev/null 2>&1 &
 fi
 
-echo "Theme [$THEME_CHOICE] applied successfully on $TARGET_DISP!"
+echo "Theme [$THEME_CHOICE] applied glitch-free on $TARGET_DISP!"
