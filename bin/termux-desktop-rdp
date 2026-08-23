@@ -12,7 +12,10 @@ pkill -9 -x xrdp 2>/dev/null || true
 rm -f /data/data/com.termux/files/usr/var/run/xrdp*.pid
 rm -rf /data/data/com.termux/files/usr/tmp/.xrdp
 
-# 3. Launch RDP Server on Port 3390
+# 3. Elevate process priorities and tune TCP socket parameters
+/data/data/com.termux/files/usr/bin/termux-optimize-system >/dev/null 2>&1 || true
+
+# 4. Launch RDP Server on Port 3390
 setsid env PATH=$PATH TMPDIR=$TMPDIR xrdp -n > /data/data/com.termux/files/home/xrdp.log 2>&1 &
 
 echo "Separate RDP Server running on port 3390 (Display :1)"

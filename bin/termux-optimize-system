@@ -1,0 +1,18 @@
+#!/data/data/com.termux/files/usr/bin/bash
+echo "[Termux Optimizer] Elevating process priorities for ultra-low latency..."
+
+for proc in Xvnc xrdp scrcpy xfwm4 xfce4-panel; do
+    PIDS=$(pgrep -f "$proc" 2>/dev/null || true)
+    if [ -n "$PIDS" ]; then
+        for pid in $PIDS; do
+            renice -n -10 -p "$pid" 2>/dev/null || true
+        done
+        echo "  - Elevated priority for $proc"
+    fi
+done
+
+sysctl -w net.ipv4.tcp_nodelay=1 2>/dev/null || true
+sysctl -w net.core.rmem_max=16777216 2>/dev/null || true
+sysctl -w net.core.wmem_max=16777216 2>/dev/null || true
+
+echo "[Termux Optimizer] System process priorities optimized!"
