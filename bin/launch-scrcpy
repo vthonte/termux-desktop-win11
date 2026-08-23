@@ -1,0 +1,9 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export DISPLAY="${DISPLAY:-:1}"
+
+if ! adb devices | grep -q "device$"; then
+    adb connect 127.0.0.1:5555 2>/dev/null || true
+fi
+
+echo "Launching Android Phone Mirror in X11/RDP window..."
+scrcpy --no-audio --window-title="Android Apps & Screen" 2>&1
