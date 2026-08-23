@@ -1,0 +1,46 @@
+#!/data/data/com.termux/files/usr/bin/bash
+echo "=========================================================="
+echo "    🚀 Termux & XFCE Desktop Full System Optimizer       "
+echo "=========================================================="
+
+# 1. Package & Storage Cleanup
+echo "[1/5] Cleaning APT package cache and temporary files..."
+apt clean 2>/dev/null || true
+apt autoremove -y 2>/dev/null || true
+rm -rf /data/data/com.termux/files/usr/tmp/* 2>/dev/null || true
+rm -rf ~/.cache/thumbnails/* 2>/dev/null || true
+
+# 2. XFCE Compositor & Window Manager Speedup
+echo "[2/5] Optimizing XFWM4 window manager & UI compositor..."
+export DISPLAY="${DISPLAY:-:1}"
+if pgrep -f xfce4-session >/dev/null 2>&1; then
+    XFCE_PID=$(pgrep -f xfce4-session | head -n 1)
+    if [ -f "/proc/$XFCE_PID/environ" ]; then
+        export DBUS_SESSION_BUS_ADDRESS=$(xargs -0 -L1 -a "/proc/$XFCE_PID/environ" 2>/dev/null | grep DBUS_SESSION_BUS_ADDRESS | cut -d= -f2-)
+    fi
+fi
+xfconf-query -c xfwm4 -p /general/use_compositing -s false --create -t bool 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/box_resize -s true --create -t bool 2>/dev/null || true
+xfconf-query -c xfwm4 -p /general/box_move -s true --create -t bool 2>/dev/null || true
+
+# 3. GPU Vulkan Acceleration Environment Setup
+echo "[3/5] Setting up Mesa Vulkan Zink GPU hardware acceleration..."
+cat << 'EOF' > ~/.android_env
+export MESA_LOADER_DRIVER_OVERRIDE=zink
+export GALLIUM_DRIVER=zink
+export ZINK_DESCRIPTORS=lazy
+export MESA_VK_WSI_PRESENT_MODE=mailbox
+EOF
+
+# 4. Elevated Process Priorities
+echo "[4/5] Elevating CPU priorities for desktop daemons..."
+/data/data/com.termux/files/usr/bin/termux-optimize-system 2>/dev/null || true
+
+# 5. Git repository sync
+echo "[5/5] Backing up and syncing optimizations to GitHub..."
+cp -f /data/data/com.termux/files/usr/bin/termux-full-optimize /data/data/com.termux/files/home/work/x11/bin/ 2>/dev/null || true
+chmod +x /data/data/com.termux/files/home/work/x11/bin/* 2>/dev/null || true
+
+echo "=========================================================="
+echo "  ✅ Termux & Desktop UI Optimization Complete!"
+echo "=========================================================="
