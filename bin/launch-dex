@@ -10,8 +10,8 @@ adb -s 127.0.0.1:5555 shell settings put system accelerometer_rotation 0 2>/dev/
 adb -s 127.0.0.1:5555 shell settings put system user_rotation 1 2>/dev/null || true
 adb -s 127.0.0.1:5555 shell settings put global enable_freeform_support 1 2>/dev/null || true
 
-echo "Launching High-Speed Smooth 60 FPS DeX Desktop (50ms Jitter Buffer)..."
+echo "Launching Ultra-Low Latency H.265 HEVC 60 FPS DeX Desktop..."
 pkill -f "DeX FPS Stats" 2>/dev/null || true
 pkill -f dex-hud-overlay 2>/dev/null || true
 
-exec scrcpy -s 127.0.0.1:5555 --render-driver=opengl --video-encoder='c2.android.avc.encoder' --max-size=1280 --video-bit-rate=4M --max-fps=60 --video-buffer=50 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop" 2>&1
+exec scrcpy -s 127.0.0.1:5555 --render-driver=opengl --video-codec=h265 --video-bit-rate=2M --max-fps=60 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop" 2>&1
