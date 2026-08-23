@@ -27,7 +27,7 @@ xfconf-query -c xfwm4 -p /general/title_font -s "Inter Bold 13" --create -t stri
 xfconf-query -c xfdesktop -p /desktop-icons/font-size -s 13 --create -t int 2>/dev/null || true
 
 if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
-    echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme on $TARGET_DISP..."
+    echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme with Centered Dock + Full Status Bar on $TARGET_DISP..."
     
     # 1. GTK & Icon Theme
     xfconf-query -c xsettings -p /Net/ThemeName -s "WhiteSur-Dark" --create -t string 2>/dev/null || true
@@ -40,20 +40,23 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     # 3. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/macos-wallpaper.jpg"
 
-    # 4. Configure Plank dconf hover magnification
+    # 4. Start / Apple Finder Button Title
+    xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s " Finder" --create -t string 2>/dev/null || true
+
+    # 5. Keep Full-Width Horizontal Status Bar Active Behind Dock (100% Length, 38px Height, Bottom Position)
+    xfconf-query -c xfce4-panel -p /panels/panel-1/enable-struts -s true --create -t bool 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=1080" --create -t string 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/size -s 38 --create -t int 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/length -s 100 --create -t int 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/enter-opacity -s 100 --create -t int 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/leave-opacity -s 100 --create -t int 2>/dev/null || true
+    xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -s 0 --create -t int 2>/dev/null || true
+    xfce4-panel -r >/dev/null 2>&1 &
+
+    # 6. Configure Plank dconf hover magnification
     dconf write /net/launchpad/plank/docks/dock1/zoom-enabled true 2>/dev/null || true
     dconf write /net/launchpad/plank/docks/dock1/zoom-percent 150 2>/dev/null || true
     dconf write /net/launchpad/plank/docks/dock1/icon-size 52 2>/dev/null || true
-
-    # 5. Disable Panel Struts Reservation, Move Panel Off-Screen (-2000px), 0% Opacity & Size=1
-    xfconf-query -c xfce4-panel -p /panels/panel-1/enable-struts -s false --create -t bool 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=-2000" --create -t string 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/size -s 1 --create -t int 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/length -s 0 --create -t int 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/enter-opacity -s 0 --create -t int 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/leave-opacity -s 0 --create -t int 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -s 2 --create -t int 2>/dev/null || true
-    xfce4-panel -r >/dev/null 2>&1 &
 
     # Save current theme state
     echo "macos" > ~/.current_theme
@@ -82,7 +85,7 @@ else
         xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s "Start" --create -t string 2>/dev/null || true
     fi
 
-    # 6. Enable Struts & Reset Windows 11 Taskbar Panel (Full Width 100%, 38px height, 100% Opacity, autohide=0)
+    # 6. Reset Windows 11 Taskbar Panel (Full Width 100%, 38px height, 100% Opacity, autohide=0)
     xfconf-query -c xfce4-panel -p /panels/panel-1/enable-struts -s true --create -t bool 2>/dev/null || true
     xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=1080" --create -t string 2>/dev/null || true
     xfconf-query -c xfce4-panel -p /panels/panel-1/size -s 38 --create -t int 2>/dev/null || true
@@ -119,7 +122,7 @@ fi
 # Wait for Window Manager frame redraw to complete
 sleep 1.0
 
-# If macOS Mode, launch Plank Dock FRESH
+# If macOS Mode, launch Plank Dock FRESH centered on top of status bar
 if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     pkill -9 -f plank 2>/dev/null || true
     plank >/dev/null 2>&1 &
