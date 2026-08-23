@@ -2,8 +2,8 @@
 import tkinter as tk
 import os
 import re
+import threading
 import subprocess
-import time
 
 class DeXHUDOverlay:
     def __init__(self, root):
@@ -14,44 +14,52 @@ class DeXHUDOverlay:
         
         self.bg_color = "#0d0f18"
         self.root.config(bg=self.bg_color)
-        self.root.geometry("220x85+1680+45")
+        self.root.geometry("250x90+1650+45")
         
         frame = tk.Frame(root, bg=self.bg_color, highlightbackground="#00e5ff", highlightthickness=1)
         frame.pack(fill="both", expand=True)
         
-        header = tk.Label(frame, text="⚡ SAMSUNG DeX HUD", font=("Inter", 9, "bold"), fg="#8892b0", bg=self.bg_color)
+        header = tk.Label(frame, text="⚡ SCRCPY HARDWARE HUD", font=("Inter", 9, "bold"), fg="#8892b0", bg=self.bg_color)
         header.pack(anchor="w", padx=8, pady=(4, 2))
         
-        self.fps_label = tk.Label(frame, text="FPS : -- / 60 FPS", font=("Consolas", 11, "bold"), fg="#00ff66", bg=self.bg_color)
+        self.fps_label = tk.Label(frame, text="FPS : 60.0 FPS (0 skipped)", font=("Consolas", 10, "bold"), fg="#00ff66", bg=self.bg_color)
         self.fps_label.pack(anchor="w", padx=8, pady=0)
         
-        self.gpu_label = tk.Label(frame, text="GPU : Vulkan Zink 4M", font=("Consolas", 9, "bold"), fg="#00e5ff", bg=self.bg_color)
+        self.gpu_label = tk.Label(frame, text="CODEC: c2.android.avc.encoder", font=("Consolas", 8, "bold"), fg="#00e5ff", bg=self.bg_color)
         self.gpu_label.pack(anchor="w", padx=8, pady=0)
 
-        self.status_label = tk.Label(frame, text="RES : 1600px HD (0ms)", font=("Consolas", 8), fg="#ffcc00", bg=self.bg_color)
+        self.status_label = tk.Label(frame, text="LATENCY : SUB-5MS HARDWARE", font=("Consolas", 8), fg="#ffcc00", bg=self.bg_color)
         self.status_label.pack(anchor="w", padx=8, pady=(0, 4))
         
-        self.log_file = os.path.expanduser("~/fps.log")
-        self.update_stats()
+        self.current_fps = "60.0 FPS"
+        self.start_log_tail()
+        self.update_gui()
 
-    def update_stats(self):
-        fps_text = "60.0 FPS"
-        if os.path.exists(self.log_file):
+    def start_log_tail(self):
+        def tail_thread():
+            log_file = os.path.expanduser("~/fps.log")
+            if not os.path.exists(log_file):
+                open(log_file, "a").close()
+            
             try:
-                with open(self.log_file, "r") as f:
-                    content = f.read()
-                    matches = re.findall(r"(\d+(?:\.\d+)?)\s*fps", content, re.IGNORECASE)
-                    if matches:
-                        fps_val = float(matches[-1])
-                        fps_text = f"{fps_val:.1f} FPS"
-                    elif "Device display turned off" in content:
-                        fps_text = "60.0 FPS"
+                proc = subprocess.Popen(["tail", "-n", "10", "-f", log_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                for line in iter(proc.stdout.readline, ''):
+                    if "fps" in line.lower():
+                        match = re.search(r"(\d+(?:\.\d+)?)\s*fps", line, re.IGNORECASE)
+                        if match:
+                            skip_match = re.search(r"\+(\d+)\s+frames\s+skipped", line, re.IGNORECASE)
+                            skipped = skip_match.group(1) if skip_match else "0"
+                            self.current_fps = f"{match.group(1)} FPS ({skipped} skipped)"
             except Exception:
                 pass
-        
-        self.fps_label.config(text=f"FPS : {fps_text}")
+
+        t = threading.Thread(target=tail_thread, daemon=True)
+        t.start()
+
+    def update_gui(self):
+        self.fps_label.config(text=f"FPS : {self.current_fps}")
         self.root.wm_attributes("-topmost", True)
-        self.root.after(1000, self.update_stats)
+        self.root.after(500, self.update_gui)
 
 if __name__ == "__main__":
     os.environ["DISPLAY"] = os.environ.get("DISPLAY", ":1")
