@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 export DISPLAY="${DISPLAY:-:1}"
+export ZINK_DESCRIPTORS=lazy
+export MESA_VK_WSI_PRESENT_MODE=mailbox
 
 if ! adb devices | grep -q "127.0.0.1:5555.*device"; then
     adb connect 127.0.0.1:5555 2>/dev/null || true
