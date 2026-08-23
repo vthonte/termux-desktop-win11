@@ -34,8 +34,8 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     pkill -9 -f xfce4-panel 2>/dev/null || true
 
     # 5. Launch interactive macOS Plank Dock
-    pkill -f plank 2>/dev/null || true
-    proot-distro login ubuntu --bind /data/data/com.termux/files/usr/tmp/.X11-unix:/tmp/.X11-unix -- env DISPLAY="$TARGET_DISP" plank >/dev/null 2>&1 &
+    pkill -9 -f plank 2>/dev/null || true
+    proot-distro login ubuntu --bind /data/data/com.termux/files/usr/tmp/.X11-unix:/tmp/.X11-unix -- sh -c "export DISPLAY=$TARGET_DISP; exec plank" >/dev/null 2>&1 &
 
     # Save current theme state
     echo "macos" > ~/.current_theme
