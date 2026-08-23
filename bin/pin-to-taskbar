@@ -1,0 +1,31 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export DISPLAY="${DISPLAY:-:1}"
+
+if [ -z "$1" ]; then
+    echo "Usage: pin-to-taskbar /path/to/app.desktop"
+    echo "Example: pin-to-taskbar /data/data/com.termux/files/usr/share/applications/xfce4-terminal.desktop"
+    exit 1
+fi
+
+DESKTOP_FILE="$1"
+if [ ! -f "$DESKTOP_FILE" ]; then
+    echo "Error: File $DESKTOP_FILE not found!"
+    exit 1
+fi
+
+DBUS_PATH=$(ls -t /data/data/com.termux/files/usr/tmp/dbus-* 2>/dev/null | grep -v 'dbus-1' | head -n 1)
+if [ -n "$DBUS_PATH" ]; then
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_PATH"
+fi
+
+# Add launcher plugin to panel-1
+NEXT_ID=$(xfconf-query -c xfce4-panel -p /plugins -l 2>/dev/null | grep -o 'plugin-[0-9]*' | sed 's/plugin-//' | sort -n | tail -n 1)
+NEXT_ID=$((NEXT_ID + 1))
+
+xfconf-query -c xfce4-panel -p "/plugins/plugin-$NEXT_ID" -s "launcher" --create -t string 2>/dev/null || true
+xfconf-query -c xfce4-panel -p "/plugins/plugin-$NEXT_ID/items" -a -t string -s "$DESKTOP_FILE" --create 2>/dev/null || true
+
+# Add to panel-1 plugin-ids array
+xfce4-panel --add=launcher "$DESKTOP_FILE" 2>/dev/null || true
+
+echo "App $DESKTOP_FILE pinned to taskbar!"
