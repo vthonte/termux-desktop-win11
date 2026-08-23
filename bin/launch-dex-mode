@@ -7,5 +7,5 @@ fi
 
 adb -s 127.0.0.1:5555 shell settings put global enable_freeform_support 1 2>/dev/null || true
 
-echo "Launching Ultra-Fast Zero-Latency Instant Android Desktop (Qualcomm Hardware Encoder)..."
-scrcpy -s 127.0.0.1:5555 --video-codec=h264 --video-encoder='c2.qti.avc.encoder' --video-bit-rate=2M --max-fps=60 --max-size=1024 --display-buffer=0 --no-audio --turn-screen-off --stay-awake --window-title="⚡ Zero-Lag Instant Android Desktop" 2>&1
+echo "Launching Crystal-Clear 1080p Widescreen Android Desktop (12M Bitrate Qualcomm Hardware Encoder)..."
+scrcpy -s 127.0.0.1:5555 --video-codec=h264 --video-encoder='c2.qti.avc.encoder' --max-size=1920 --video-bit-rate=12M --max-fps=60 --display-buffer=0 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Crystal-Clear 1080p Android Desktop" 2>&1
