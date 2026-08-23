@@ -101,7 +101,10 @@ if [ -f "$WALLPAPER" ]; then
     done
 fi
 
-# Force XFCE Settings & Window Manager to reload themes live
+# Force XFCE Settings & Window Manager to reload themes live with active DBUS address
+if [ -n "$DBUS_PATH" ]; then
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_PATH"
+fi
 xfsettingsd --replace >/dev/null 2>&1 &
 xfwm4 --replace >/dev/null 2>&1 &
 
