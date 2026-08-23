@@ -1,0 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export DISPLAY="${DISPLAY:-:1}"
+echo "Launching Brave Browser inside PRoot Ubuntu (glibc environment)..."
+exec proot-distro login ubuntu -- env DISPLAY="$DISPLAY" brave-browser --no-sandbox "$@"
