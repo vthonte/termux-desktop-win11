@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/bash
-export DISPLAY="${DISPLAY:-:1}"
+export DISPLAY="${DISPLAY:-:0}"
 
 if ! adb devices | grep -q "127.0.0.1:5555.*device"; then
     adb connect 127.0.0.1:5555 2>/dev/null || true
@@ -10,7 +10,7 @@ adb -s 127.0.0.1:5555 shell settings put system accelerometer_rotation 0 2>/dev/
 adb -s 127.0.0.1:5555 shell settings put system user_rotation 1 2>/dev/null || true
 adb -s 127.0.0.1:5555 shell settings put global enable_freeform_support 1 2>/dev/null || true
 
-echo "Launching High-Resolution OpenGL Hardware-Accelerated DeX Desktop (1600px HD)..."
+echo "Launching High-Resolution OpenGL Hardware-Accelerated DeX Desktop (1600px HD on $DISPLAY)..."
 pkill -f "DeX FPS Stats" 2>/dev/null || true
 pkill -f dex-hud-overlay 2>/dev/null || true
 
