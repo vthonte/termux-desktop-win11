@@ -13,8 +13,11 @@ fi
 
 mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/ ~/.config/gtk-3.0/
 
+# Enable Compositing for Cairo-Dock 3D Effects and Transparency
+xfconf-query -c xfwm4 -p /general/use_compositing -s true --create -t bool 2>/dev/null || true
+
 if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
-    echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme on $TARGET_DISP..."
+    echo "[Theme Switcher] Applying macOS Big Sur / Sequoia Theme with Cairo-Dock on $TARGET_DISP..."
     
     # 1. GTK & Icon Theme
     xfconf-query -c xsettings -p /Net/ThemeName -s "WhiteSur-Dark" --create -t string 2>/dev/null || true
@@ -27,14 +30,13 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
     # 3. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/macos-wallpaper.jpg"
 
-    # 4. Start Menu / Apple Menu Title
-    xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-title -s " Finder" --create -t string 2>/dev/null || true
+    # 4. Hide Windows Taskbar Panel completely
+    pkill -9 -f xfce4-panel 2>/dev/null || true
+    pkill -9 -f plank 2>/dev/null || true
 
-    # 5. Transform panel into macOS Floating Dock at bottom (Centered, 52px tall icons, 1% length automatic expand)
-    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=10;x=0;y=0" --create -t string 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/size -s 52 --create -t int 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/length -s 1 --create -t int 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/autohide-behavior -s 0 --create -t int 2>/dev/null || true
+    # 5. Launch 3D Animated Cairo-Dock
+    pkill -9 -f cairo-dock 2>/dev/null || true
+    cairo-dock -c >/dev/null 2>&1 &
 
     # Save current theme state
     echo "macos" > ~/.current_theme
@@ -42,23 +44,27 @@ if [ "$THEME_CHOICE" = "macos" ] || [ "$THEME_CHOICE" = "mac" ]; then
 else
     echo "[Theme Switcher] Applying Windows 11 Light Mode Theme on $TARGET_DISP..."
     
-    # 1. Transform panel into Windows 11 Full-Width Bottom Taskbar (100% length, 38px size)
-    xfconf-query -c xfce4-panel -p /panels/panel-1/position -s "p=6;x=0;y=1080" --create -t string 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/size -s 38 --create -t int 2>/dev/null || true
-    xfconf-query -c xfce4-panel -p /panels/panel-1/length -s 100 --create -t int 2>/dev/null || true
+    # 1. Kill Cairo-Dock & Plank
+    pkill -9 -f cairo-dock 2>/dev/null || true
+    pkill -9 -f plank 2>/dev/null || true
 
-    # 2. GTK & Icon Theme
+    # 2. Relaunch Windows 11 Taskbar Panel
+    if ! pgrep -f xfce4-panel >/dev/null 2>&1; then
+        xfce4-panel >/dev/null 2>&1 &
+    fi
+
+    # 3. GTK & Icon Theme
     xfconf-query -c xsettings -p /Net/ThemeName -s "Fluent-Light" --create -t string 2>/dev/null || true
     xfconf-query -c xsettings -p /Net/IconThemeName -s "Fluent-light" --create -t string 2>/dev/null || true
     xfconf-query -c xfwm4 -p /general/theme -s "Fluent-Light" --create -t string 2>/dev/null || true
     
-    # 3. Window Control Buttons: Right-aligned Windows buttons |HMC (Hide, Maximize, Close)
+    # 4. Window Control Buttons: Right-aligned Windows buttons |HMC (Hide, Maximize, Close)
     xfconf-query -c xfwm4 -p /general/button_layout -s "|HMC" --create -t string 2>/dev/null || true
 
-    # 4. Wallpaper
+    # 5. Wallpaper
     WALLPAPER="/data/data/com.termux/files/usr/share/backgrounds/windows11-light.jpg"
 
-    # 5. Start Menu Logo & Title
+    # 6. Start Menu Logo & Title
     LOGO_PATH="/data/data/com.termux/files/usr/share/icons/windows-logo.png"
     if [ -f "$LOGO_PATH" ]; then
         xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-icon -s "$LOGO_PATH" --create -t string 2>/dev/null || true
@@ -77,8 +83,7 @@ if [ -f "$WALLPAPER" ]; then
     done
 fi
 
-# Force XFCE Settings, Panel, and Window Manager to reload themes live
-xfce4-panel --restart >/dev/null 2>&1 &
+# Force XFCE Settings & Window Manager to reload themes live
 xfsettingsd --replace >/dev/null 2>&1 &
 xfwm4 --replace >/dev/null 2>&1 &
 
