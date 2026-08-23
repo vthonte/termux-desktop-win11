@@ -1,0 +1,11 @@
+#!/data/data/com.termux/files/usr/bin/bash
+export DISPLAY="${DISPLAY:-:1}"
+
+if ! adb devices | grep -q "127.0.0.1:5555.*device"; then
+    adb connect 127.0.0.1:5555 2>/dev/null || true
+fi
+
+adb -s 127.0.0.1:5555 shell settings put global enable_freeform_support 1 2>/dev/null || true
+
+echo "Launching Samsung DeX Widescreen Desktop (Software 2D Mode)..."
+scrcpy -s 127.0.0.1:5555 --render-driver=software --display-orientation=90 --no-audio --turn-screen-off --stay-awake --window-title="🖥️ Samsung DeX Desktop" 2>&1
